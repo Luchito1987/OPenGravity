@@ -1,0 +1,21 @@
+services:
+  - type: worker
+    name: opengravity-bot
+    env: docker
+    plan: free
+    region: oregon
+    dockerFilePath: Dockerfile
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ALLOWED_USER_IDS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: ./service-account.json
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        description: "Paste the full JSON content of your service-account.json here as a fallback"
+        sync: false
