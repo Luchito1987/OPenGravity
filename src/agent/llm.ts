@@ -47,12 +47,11 @@ export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
         'meta-llama/llama-3.3-70b-instruct:free',
         'google/gemini-2.0-flash-lite-preview-02-05:free',
         'google/gemini-2.0-pro-exp-02-05:free',
-        'mistralai/pixtral-12b:free',
+        'deepseek/deepseek-r1:free',
+        'mistralai/mistral-7b-instruct:free',
         'qwen/qwen-2.5-72b-instruct:free',
-        'qwen/qwen3-coder:free',
         'nvidia/nemotron-4-340b-instruct:free',
-        'qwen/qwen3-next-80b-a3b-instruct:free',
-        'openrouter/free'
+        'google/gemini-2.0-flash-exp:free'
       ];
       
       let lastError: any;

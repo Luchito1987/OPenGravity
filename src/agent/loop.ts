@@ -54,7 +54,7 @@ export async function processUserMessage(userId: string, userPrompt: string, ima
   await memory.addMessage(userId, 'user', processedUserPrompt, { imageUrl });
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
-    const history = (await memory.getMessages(userId, 50)) as MessageRecord[];
+    const history = (await memory.getMessages(userId, 15)) as MessageRecord[];
     
     const openAIMessages: OpenAI.ChatCompletionMessageParam[] = history.map(msg => {
       if (msg.role === 'tool') {
