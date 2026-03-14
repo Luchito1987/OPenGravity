@@ -12,14 +12,16 @@ const openRouterClient = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
 });
 
-const openAITools: OpenAI.ChatCompletionTool[] = Object.values(agentTools).map((t) => ({
-  type: 'function',
-  function: {
-    name: t.name,
-    description: t.description,
-    parameters: t.parameters as unknown as Record<string, unknown>,
-  },
-}));
+function getOpenAITools(): OpenAI.ChatCompletionTool[] {
+  return Object.values(agentTools).map((t) => ({
+    type: 'function',
+    function: {
+      name: t.name,
+      description: t.description,
+      parameters: t.parameters as unknown as Record<string, unknown>,
+    },
+  }));
+}
 
 export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
   try {
@@ -29,11 +31,14 @@ export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
     
     const model = hasImage ? config.GROQ_VISION_MODEL : config.GROQ_MODEL;
 
+    const tools = getOpenAITools();
+    console.log(`[LLM] Calling Groq with ${tools.length} tools...`);
+    
     const response = await groqClient.chat.completions.create({
       model: model,
       messages: messages,
-      tools: openAITools.length > 0 ? openAITools : undefined,
-      tool_choice: openAITools.length > 0 ? 'auto' : undefined,
+      tools: tools.length > 0 ? tools : undefined,
+      tool_choice: tools.length > 0 ? 'auto' : undefined,
     });
     return response.choices[0].message;
   } catch (error: any) {
@@ -58,12 +63,14 @@ export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
       for (const fModel of [...new Set(fallbackModels)]) {
          try {
            console.warn(`[Fallback] Trying OpenRouter model: ${fModel}`);
-           const response = await openRouterClient.chat.completions.create({
-             model: fModel,
-             messages: messages,
-             tools: openAITools.length > 0 ? openAITools : undefined,
-             tool_choice: openAITools.length > 0 ? 'auto' : undefined,
-           });
+            const tools = getOpenAITools();
+            console.log(`[Fallback] Calling OpenRouter with ${tools.length} tools...`);
+            const response = await openRouterClient.chat.completions.create({
+              model: fModel,
+              messages: messages,
+              tools: tools.length > 0 ? tools : undefined,
+              tool_choice: tools.length > 0 ? 'auto' : undefined,
+            });
            return response.choices[0].message;
          } catch (e: any) {
            console.warn(`[Fallback] Model ${fModel} failed: ${e.message}`);
