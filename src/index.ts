@@ -201,7 +201,15 @@ bot.catch((err) => {
 
 // Start bot
 if (config.WEBHOOK_URL) {
-  const server = http.createServer(webhookCallback(bot, 'http'));
+  const handler = webhookCallback(bot, 'http');
+  const server = http.createServer((req, res) => {
+    if (req.method === 'GET') {
+      res.writeHead(200);
+      res.end('Bot is running!');
+      return;
+    }
+    handler(req, res);
+  });
   const port = config.PORT || 3000;
   server.listen(port, async () => {
     console.log(`[Bot] Running via Webhook on port ${port}`);

@@ -91,16 +91,27 @@ class FirestoreMemory implements IMemory {
   constructor() {
     if (!admin.apps.length) {
       let credential;
+      let serviceAccountJson: any;
+      let appName: string | undefined;
+
       if (config.GOOGLE_SERVICE_ACCOUNT_JSON) {
         console.log('[Memory] Initializing Firestore with Service Account JSON string');
-        credential = admin.credential.cert(JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_JSON));
+        serviceAccountJson = JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_JSON);
+        appName = 'firestore_string_cred'; // Give a unique name if initializing multiple apps
       } else {
         const serviceAccountPath = resolve(process.cwd(), config.GOOGLE_APPLICATION_CREDENTIALS);
         console.log(`[Memory] Initializing Firestore with key file: ${serviceAccountPath}`);
-        credential = admin.credential.cert(JSON.parse(readFileSync(serviceAccountPath, 'utf8')));
+        serviceAccountJson = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+        appName = 'firestore_file_cred'; // Give a unique name if initializing multiple apps
       }
-      
-      admin.initializeApp({ credential });
+
+      if (serviceAccountJson && serviceAccountJson.private_key) {
+        serviceAccountJson.private_key = serviceAccountJson.private_key.replace(/\\n/g, '\n');
+      }
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccountJson),
+      }, appName);
     }
     this.db = admin.firestore();
     console.log('[Memory] Cloud Firestore Storage connected');
