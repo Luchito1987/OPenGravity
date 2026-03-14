@@ -200,11 +200,17 @@ bot.catch((err) => {
 });
 
 // Start bot
-if (process.env.WEBHOOK_URL) {
+if (config.WEBHOOK_URL) {
   const server = http.createServer(webhookCallback(bot, 'http'));
   const port = config.PORT || 3000;
-  server.listen(port, () => {
+  server.listen(port, async () => {
     console.log(`[Bot] Running via Webhook on port ${port}`);
+    try {
+      await bot.api.setWebhook(config.WEBHOOK_URL);
+      console.log(`[Bot] Webhook set to: ${config.WEBHOOK_URL}`);
+    } catch (e) {
+      console.error(`[Bot] Failed to set webhook:`, e);
+    }
   });
 } else {
   console.log('[Bot] Starting OpenGravity telegram bot via Long Polling...');

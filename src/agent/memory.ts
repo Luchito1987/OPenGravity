@@ -89,14 +89,21 @@ class FirestoreMemory implements IMemory {
   private db: admin.firestore.Firestore;
 
   constructor() {
-    const serviceAccountPath = resolve(process.cwd(), config.GOOGLE_APPLICATION_CREDENTIALS);
     if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(readFileSync(serviceAccountPath, 'utf8'))),
-      });
+      let credential;
+      if (config.GOOGLE_SERVICE_ACCOUNT_JSON) {
+        console.log('[Memory] Initializing Firestore with Service Account JSON string');
+        credential = admin.credential.cert(JSON.parse(config.GOOGLE_SERVICE_ACCOUNT_JSON));
+      } else {
+        const serviceAccountPath = resolve(process.cwd(), config.GOOGLE_APPLICATION_CREDENTIALS);
+        console.log(`[Memory] Initializing Firestore with key file: ${serviceAccountPath}`);
+        credential = admin.credential.cert(JSON.parse(readFileSync(serviceAccountPath, 'utf8')));
+      }
+      
+      admin.initializeApp({ credential });
     }
     this.db = admin.firestore();
-    console.log('[Memory] Initialized Cloud Firestore Storage');
+    console.log('[Memory] Cloud Firestore Storage connected');
   }
 
   async addMessage(userId: string | number, role: string, content: string, options?: any) {
@@ -144,8 +151,12 @@ class FirestoreMemory implements IMemory {
 
 // Factory export
 function createMemory(): IMemory {
+  // Check if we have credentials via string or file
+  const hasStringCreds = !!config.GOOGLE_SERVICE_ACCOUNT_JSON;
   const saPath = resolve(process.cwd(), config.GOOGLE_APPLICATION_CREDENTIALS);
-  if (existsSync(saPath)) {
+  const hasFileCreds = existsSync(saPath);
+
+  if (hasStringCreds || hasFileCreds) {
     try {
       return new FirestoreMemory();
     } catch (e) {
