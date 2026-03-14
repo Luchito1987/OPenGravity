@@ -42,8 +42,12 @@ export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
     });
     return response.choices[0].message;
   } catch (error: any) {
-    console.warn(`[LLM] Groq error: ${error?.status} - ${error?.message || error}`);
-    if (error?.status === 429 || error?.code === 'rate_limit_exceeded' || error?.status === 413) {
+    console.error(`[LLM] Groq error: ${error.status} - ${error.message}`);
+    if (error.status === 400) {
+      console.error(`[LLM] 400 Error Details: ${JSON.stringify(error, null, 2)}`);
+      // Fallback will trigger below
+    }
+    if (error?.status === 429 || error?.code === 'rate_limit_exceeded' || error?.status === 413 || error?.status === 400) {
       console.warn('[Fallback] Falling back to OpenRouter...');
       if (!config.OPENROUTER_API_KEY || config.OPENROUTER_API_KEY === 'SUTITUYE POR EL TUYO') {
         throw new Error('Groq limit/size exceeded and OPENROUTER_API_KEY is not configured.');

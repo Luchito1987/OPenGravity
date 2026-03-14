@@ -201,7 +201,7 @@ bot.catch((err) => {
 
 // Start bot
 if (config.WEBHOOK_URL) {
-  const handler = webhookCallback(bot, 'http');
+  const handler = webhookCallback(bot, 'http', { timeoutMilliseconds: 60000 });
   const server = http.createServer((req, res) => {
     // Health check for non-POST or empty updates
     if (req.method !== 'POST' || req.headers['content-length'] === '0') {
