@@ -203,9 +203,10 @@ bot.catch((err) => {
 if (config.WEBHOOK_URL) {
   const handler = webhookCallback(bot, 'http');
   const server = http.createServer((req, res) => {
-    if (req.method !== 'POST') {
+    // Health check for non-POST or empty updates
+    if (req.method !== 'POST' || req.headers['content-length'] === '0') {
       res.writeHead(200);
-      res.end('Bot is running! (Health check passed)');
+      res.end('Bot is running! (Listening for webhooks)');
       return;
     }
     handler(req, res);

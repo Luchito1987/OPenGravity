@@ -139,7 +139,13 @@ REGLAS CRÍTICAS PARA CALENDARIO (LLAMANDO A LA HERRAMIENTA google_ecosystem):
     
     openAIMessages.unshift(systemPrompt);
 
-    const completionMessage = await askLLM(openAIMessages);
+    let completionMessage;
+    try {
+      completionMessage = await askLLM(openAIMessages);
+    } catch (e: any) {
+      console.error(`[ProcessUserMessage] LLM Failure: ${e.message}`);
+      return `❌ Error: No he podido procesar tu mensaje debido a un límite de capacidad en los servidores de IA (Groq/OpenRouter). Por favor, intenta de nuevo en unos momentos o envía un mensaje más corto.\n\nDetalles: ${e.message}`;
+    }
 
     if (completionMessage.tool_calls && completionMessage.tool_calls.length > 0) {
       await memory.addMessage(userId, 'assistant', completionMessage.content || '', {

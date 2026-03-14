@@ -37,11 +37,11 @@ export async function askLLM(messages: OpenAI.ChatCompletionMessageParam[]) {
     });
     return response.choices[0].message;
   } catch (error: any) {
-    console.warn(`[LLM] Groq error: ${error?.message || error}`);
-    if (error?.status === 429 || error?.code === 'rate_limit_exceeded') {
+    console.warn(`[LLM] Groq error: ${error?.status} - ${error?.message || error}`);
+    if (error?.status === 429 || error?.code === 'rate_limit_exceeded' || error?.status === 413) {
       console.warn('[Fallback] Falling back to OpenRouter...');
       if (!config.OPENROUTER_API_KEY || config.OPENROUTER_API_KEY === 'SUTITUYE POR EL TUYO') {
-        throw new Error('Groq limit exceeded and OPENROUTER_API_KEY is not configured.');
+        throw new Error('Groq limit/size exceeded and OPENROUTER_API_KEY is not configured.');
       }
       const fallbackModels = [
         'meta-llama/llama-3.3-70b-instruct:free',
