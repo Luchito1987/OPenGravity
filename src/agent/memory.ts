@@ -111,7 +111,7 @@ class FirestoreMemory implements IMemory {
 
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccountJson),
-      }, appName);
+      });
     }
     this.db = admin.firestore();
     console.log('[Memory] Cloud Firestore Storage connected');

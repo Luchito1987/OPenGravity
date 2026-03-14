@@ -203,9 +203,9 @@ bot.catch((err) => {
 if (config.WEBHOOK_URL) {
   const handler = webhookCallback(bot, 'http');
   const server = http.createServer((req, res) => {
-    if (req.method === 'GET') {
+    if (req.method !== 'POST') {
       res.writeHead(200);
-      res.end('Bot is running!');
+      res.end('Bot is running! (Health check passed)');
       return;
     }
     handler(req, res);
